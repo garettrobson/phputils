@@ -1,0 +1,16 @@
+{
+    "name": "phputils/jsonobject",
+    "description": "PHP utility to perform common operations on json objects.",
+    "type": "library",
+    "require": {
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.1"
+    },
+    "authors": [
+        {
+            "name": "Garett Robson",
+            "email": "info@garettrobson.co.uk"
+        }
+    ]
+}
