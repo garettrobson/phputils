@@ -98,7 +98,7 @@ final class EmailTest extends TestCase
         $this->assertSame($destination->key->merge, ['foo', 'bar']);
     }
 
-    public function testValue(): void
+    public function testGet(): void
     {
         $search = json_decode('{"foo": {"bar": "baz", "qux": ["quux", "quuz", "corge"]}}');
 
@@ -107,5 +107,19 @@ final class EmailTest extends TestCase
 
         $value = JsonObject::get($search, "foo.qux");
         $this->assertSame($value, ["quux", "quuz", "corge"]);
+
+        $value = JsonObject::get($search, "invalid.key", "default");
+        $this->assertSame($value, "default");
+    }
+
+    public function testSet(): void
+    {
+        $search = json_decode('{"foo": {"bar": "baz", "qux": ["quux", "quuz", "corge"]}}');
+
+        JsonObject::set($search, "some.key", "value");
+        $this->assertSame($search->some->key, "value");
+
+        JsonObject::set($search, "foo.bar", 123);
+        $this->assertSame($search->foo->bar, 123);
     }
 }

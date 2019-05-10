@@ -7,10 +7,9 @@ declare(strict_types=1);
 
 namespace PHPUtils;
 
+use OutOfBoundsException;
 use ArrayAccess;
 use stdClass;
-use object;
-use string;
 
 /**
 *
@@ -21,10 +20,12 @@ class JsonObject
 {
     /**
     *
-    * Combine a variable number soruce stdClass and merges them into the destination stdClass.
+    * Combine objects into one.
+    *
+    * Takes a variable number *$sources* and combines them into the *$destination*.
     *
     * @param object $destination The objects to merge into a new object.
-    * @param object ...$sources The objects to merge into a new object.
+    * @param object $sources The objects to merge into a new object.
     * @return object The new $destination object, with all merged properties.
     */
     public static function combine(object $destination, object ...$sources)
@@ -51,11 +52,12 @@ class JsonObject
     }
 
     /**
+    * Merge objects into a new one.
     *
-    * Combine a variable number of stdClass objects into a new object.
+    * Takes a variable number *$sources* and produces a new, merged, one.
     *
     * @param object ...$sources The objects to merge into a new object.
-    * @return stdClass The new object.
+    * @return object The new object.
     */
     public static function merge(object ...$sources)
     {
@@ -64,22 +66,28 @@ class JsonObject
 
     /**
     *
-    * Uses a string-based address to retrieve values from a nested object
+    * Lookup a value in an object.
     *
-    * Example:
-    *  $o = { an: { example: { address: "value" } } }
-    *  get($o, "an.example.address") // would return "value"
-    *  get($o, "a.bad.address") // would return null
-    *  get($o, "a.bad.address", "default") // would return "default"
-    *  get($o, "an/example/address", "default", "/") // would return "value"
-    *  get($o, "a/bad/address", null, "/") // would return null
+    * Uses an *$address* to retrieve the values from a nested *$source* object
+    *
+    * **Example:**
+    * ```
+    * $o = json_decode("{ an: { example: { address: "value" } } }");
+    *
+    * JsonObject::get($o, "an.example.address"); // would return "value"
+    * JsonObject::get($o, "a.bad.address"); // would return null
+    * JsonObject::get($o, "a.bad.address", "default"); // would return "default"
+    * JsonObject::get($o, "an/example/address", "default", "/"); // would return "value"
+    * JsonObject::get($o, "a/bad/address", null, "/"); // would return null
+    * ```
     *
     * @param object $source The object to search.
-    * @return string $address The address of the value to return.
-    * @return mixed $default The value to return when the value is not found.
-    * @return string $delimiter The delimiter for the address.
+    * @param string $address The address of the value to return.
+    * @param mixed $default The value to return when the value is not found.
+    * @param string $delimiter The delimiter for the address.
+    * @return mixed The value retrieved from the $source object.
     */
-    public static function get(object $source, string $address, $default = null, $delimiter = '.')
+    public static function get(object $source, string $address, $default = null, string $delimiter = '.')
     {
         $parts = explode($delimiter, $address);
         $container = $source;
@@ -103,5 +111,42 @@ class JsonObject
             }
         }
         return $container;
+    }
+
+    /**
+    *
+    * Assign a value in an object.
+    *
+    * Uses an *$address* to retrieve the values from a nested *$source* object
+    *
+    * @param object $source The object to search.
+    * @param string $address The address of the value to return.
+    * @param mixed $value The value to set in the $source object.
+    * @param string $delimiter The delimiter for the address.
+    */
+    public static function set(object $source, string $address, $value, string $delimiter = '.')
+    {
+        $parts = explode($delimiter, $address);
+        $container = $source;
+        while ($key = array_shift($parts)) {
+            $type = gettype($container);
+            switch ($type) {
+                case 'array':
+                    if (!array_key_exists($key, $container)) {
+                        $contianer[$key] = new stdClass;
+                    }
+                    $container = &$contianer[$key];
+                    break;
+                case 'object':
+                    if (!property_exists($container, $key)) {
+                        $container->$key = new stdClass;
+                    }
+                    $container = &$container->$key;
+                    break;
+                default:
+                    throw new OutOfBoundsException("Unable to assign value.");
+            }
+        }
+        $container = $value;
     }
 }
