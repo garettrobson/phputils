@@ -1,5 +1,7 @@
 <?php
 /**
+* PHPUtils | JsonObject.php
+*
 * @author Garett Robson <info@garettrobson.co.uk
 */
 
@@ -168,6 +170,43 @@ class JsonObject
                 break;
             default:
                 return false;
+        }
+        return true;
+    }
+
+    /**
+    *
+    * Check that a key exists in an object.
+    *
+    * Uses an *$address* to verify that the keys exist in the *$source* object.
+    *
+    * @param object $source The object to search.
+    * @param string $address The address of the value to unset.
+    * @param string $delimiter The delimiter for the address.
+    * @return boolean True if the key was round and removed, false if not.
+    */
+    public static function exists(object $source, string $address, string $delimiter = '.')
+    {
+        $parts = explode($delimiter, $address);
+        $container = $source;
+        while ($key = array_shift($parts)) {
+            $type = gettype($container);
+            switch ($type) {
+                case 'array':
+                    if (!array_key_exists($key, $container)) {
+                        return false;
+                    }
+                    $container = $contianer[$key];
+                    break;
+                case 'object':
+                    if (!property_exists($container, $key)) {
+                        return false;
+                    }
+                    $container = $container->$key;
+                    break;
+                default:
+                    return false;
+            }
         }
         return true;
     }

@@ -123,11 +123,19 @@ final class EmailTest extends TestCase
         $this->assertSame($search->foo->bar, 123);
     }
 
-    public function testUnset(): void
+    public function testRemove(): void
     {
         $search = json_decode('{"foo": {"bar": "baz", "qux": ["quux", "quuz", "corge"]}}');
 
         JsonObject::remove($search, "foo.bar");
-        $this->assertfalse(property_exists($search->foo, 'bar'));
+        $this->assertFalse(property_exists($search->foo, 'bar'));
+    }
+
+    public function testExists(): void
+    {
+        $search = json_decode('{"foo": {"bar": "baz", "qux": ["quux", "quuz", "corge"]}}');
+
+        $this->assertTrue(JsonObject::exists($search, "foo.bar"));
+        $this->assertFalse(JsonObject::exists($search, "foo.barasdasd"));
     }
 }
