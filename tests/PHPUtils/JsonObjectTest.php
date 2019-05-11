@@ -123,11 +123,29 @@ final class EmailTest extends TestCase
         $this->assertSame($search->foo->bar, 123);
     }
 
+    public function testSetCreates(): void
+    {
+        $search = json_decode('{}');
+
+        JsonObject::set($search, "some.key", "value");
+        $this->assertSame($search->some->key, "value");
+    }
+
+    public function testSetFailure(): void
+    {
+        $search = json_decode('{"foo": {"bar": "baz", "qux": ["quux", "quuz", "corge"]}}');
+
+        $this->expectException(TypeError::class);
+        JsonObject::set($search, "foo.bar.value", "value");
+    }
+
     public function testRemove(): void
     {
         $search = json_decode('{"foo": {"bar": "baz", "qux": ["quux", "quuz", "corge"]}}');
 
-        JsonObject::remove($search, "foo.bar");
+        $this->assertTrue(JsonObject::remove($search, "foo.bar"));
+        $this->assertFalse(JsonObject::remove($search, "foo.barasds"));
+        $this->assertFalse(JsonObject::remove($search, "adasdfoo.barasds"));
         $this->assertFalse(property_exists($search->foo, 'bar'));
     }
 
@@ -137,5 +155,31 @@ final class EmailTest extends TestCase
 
         $this->assertTrue(JsonObject::exists($search, "foo.bar"));
         $this->assertFalse(JsonObject::exists($search, "foo.barasdasd"));
+    }
+
+    public function testLoadString(): void
+    {
+        $string = '{"foo": {"bar": "baz", "qux": ["quux", "quuz", "corge"]}}';
+        $object = JsonObject::loadString($string);
+        $this->assertIsObject($object);
+    }
+
+    public function testLoadStringFailure(): void
+    {
+        $string = '{{"foo": {"bar": "baz", "qux": ["quux", "quuz", "corge"]}}';
+        $this->expectException(\ParseError::class);
+        $object = JsonObject::loadString($string);
+    }
+
+    public function testLoadFile(): void
+    {
+        $this->expectException(\ParseError::class);
+        $object = JsonObject::loadFile(__FILE__);
+    }
+
+    public function testLoadNotAFile(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $object = JsonObject::loadFile(__DIR__);
     }
 }

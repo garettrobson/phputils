@@ -9,8 +9,10 @@ declare(strict_types=1);
 
 namespace PHPUtils;
 
-use OutOfBoundsException;
 use stdClass;
+use TypeError;
+use ParseError;
+use RuntimeException;
 
 /**
 *
@@ -113,7 +115,7 @@ class JsonObject
     * @param object $source The object to search.
     * @param string $address The address of the value to assign.
     * @param mixed $value The value to set in the $source object.
-    * @throws OutOfBoundsException If the key maps to a non-collection (i.e. a string, bool, int, etc).
+    * @throws TypeError If the key maps to a non-collection (i.e. a string, bool, int, etc).
     * @param string $delimiter The delimiter for the address.
     */
     public static function set(object $source, string $address, $value, string $delimiter = '.')
@@ -136,7 +138,14 @@ class JsonObject
                     $container = &$container->$key;
                     break;
                 default:
-                    throw new OutOfBoundsException("Unable to assign value.");
+                    throw new TypeError(
+                        sprintf(
+                            "%s::%s : Unable to assign value",
+                            __CLASS__,
+                            __METHOD__,
+                            json_last_error_msg()
+                        )
+                    );
             }
         }
         $container = $value;
@@ -163,9 +172,15 @@ class JsonObject
 
         switch (gettype($container)) {
             case 'array':
+                if (!array_key_exists($key, $container)) {
+                    return false;
+                }
                 unset($container[$key]);
                 break;
             case 'object':
+                if (!property_exists($container, $key)) {
+                    return false;
+                }
                 unset($container->$key);
                 break;
             default:
@@ -209,5 +224,62 @@ class JsonObject
             }
         }
         return true;
+    }
+
+    /**
+    *
+    * Performs a json_decode and returns the result..
+    *
+    * Simply does a json_decode on the string and returns the result. The main
+    * benifit is that a ParseError is thrown if there is an issue doing this.
+    *
+    * @param string $json Json string to decode.
+    * @throws ParseError If the json is not able to be decoded.
+    * @return object The decoded json object.
+    */
+    public static function loadString(string $json)
+    {
+        $object = json_decode($json);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new ParseError(
+                sprintf(
+                    "%s::%s : Error parsing string : %s",
+                    __CLASS__,
+                    __METHOD__,
+                    json_last_error_msg()
+                )
+            );
+        }
+        return $object;
+    }
+
+    /**
+    *
+    * Loads a file from a path and performs a loadString on the content,
+    * returns the result.
+    *
+    * Like loadString this is simple boilerplate, but throws exceptions when
+    * problems arise; RuntimeException when the $path is not a file, and
+    * ParseError when the contents do not decode.
+    *
+    * @param string $path Path of the file to decode.
+    * @throws RuntimeException If the $path is not a file.
+    * @throws ParseError If the json is not able to be decoded.
+    * @return boolean True if the key was round and removed, false if not.
+    */
+    public static function loadFile(string $path)
+    {
+        if (is_file($path)) {
+            return static::loadString(file_get_contents($path));
+        } else {
+            throw new RuntimeException(
+                sprintf(
+                    "%s::%s : Path is not a file : %s",
+                    __CLASS__,
+                    __METHOD__,
+                    $path
+                )
+            );
+        }
     }
 }
