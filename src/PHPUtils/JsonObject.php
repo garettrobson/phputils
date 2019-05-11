@@ -40,7 +40,8 @@ class JsonObject
                     $destination->$property = array_merge($destination->$property, $value);
                 } else {
                     if ($valueType === 'object') {
-                        $destination->$property = static::combine($destination->$property ?? new stdClass, $value);
+                        $dest = $destination->$property ?? new stdClass;
+                        $destination->$property = static::combine($dest, $value);
                     } else {
                         $destination->$property = $value;
                     }
