@@ -69,17 +69,6 @@ class JsonObject
     *
     * Uses an *$address* to retrieve the values from a nested *$source* object
     *
-    * **Example:**
-    * ```
-    * $o = json_decode("{ an: { example: { address: "value" } } }");
-    *
-    * JsonObject::get($o, "an.example.address"); // would return "value"
-    * JsonObject::get($o, "a.bad.address"); // would return null
-    * JsonObject::get($o, "a.bad.address", "default"); // would return "default"
-    * JsonObject::get($o, "an/example/address", "default", "/"); // would return "value"
-    * JsonObject::get($o, "a/bad/address", null, "/"); // would return null
-    * ```
-    *
     * @param object $source The object to search.
     * @param string $address The address of the value to return.
     * @param mixed $default The value to return when the value is not found.
