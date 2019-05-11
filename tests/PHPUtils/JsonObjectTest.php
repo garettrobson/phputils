@@ -122,4 +122,12 @@ final class EmailTest extends TestCase
         JsonObject::set($search, "foo.bar", 123);
         $this->assertSame($search->foo->bar, 123);
     }
+
+    public function testUnset(): void
+    {
+        $search = json_decode('{"foo": {"bar": "baz", "qux": ["quux", "quuz", "corge"]}}');
+
+        JsonObject::unset($search, "foo.bar");
+        $this->assertfalse(property_exists($search->foo, 'bar'));
+    }
 }
