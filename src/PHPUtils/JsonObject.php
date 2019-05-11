@@ -121,6 +121,7 @@ class JsonObject
     * @param object $source The object to search.
     * @param string $address The address of the value to assign.
     * @param mixed $value The value to set in the $source object.
+    * @throws OutOfBoundsException If the key maps to a non-collection (i.e. a string, bool, int, etc).
     * @param string $delimiter The delimiter for the address.
     */
     public static function set(object $source, string $address, $value, string $delimiter = '.')
@@ -153,18 +154,21 @@ class JsonObject
     *
     * Remove a key and associated value from an object.
     *
-    * Uses an *$address* to unset the values from a nested *$source* object
+    * Uses an *$address* to remove a key and associated value from a nested *$source* object
     *
     * @param object $source The object to search.
     * @param string $address The address of the value to unset.
     * @param string $delimiter The delimiter for the address.
+    * @return boolean True if the key was round and removed, false if not.
     */
-    public static function unset(object $source, string $address, string $delimiter = '.')
+    public static function remove(object $source, string $address, string $delimiter = '.')
     {
         $parts = explode($delimiter, $address);
         $key = array_pop($parts);
+
         $address = implode($delimiter, $parts);
         $container = static::get($source, $address, null, $delimiter);
+
         switch (gettype($container)) {
             case 'array':
                 unset($container[$key]);
@@ -172,6 +176,9 @@ class JsonObject
             case 'object':
                 unset($container->$key);
                 break;
+            default:
+                return false;
         }
+        return true;
     }
 }

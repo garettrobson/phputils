@@ -127,7 +127,7 @@ final class EmailTest extends TestCase
     {
         $search = json_decode('{"foo": {"bar": "baz", "qux": ["quux", "quuz", "corge"]}}');
 
-        JsonObject::unset($search, "foo.bar");
+        JsonObject::remove($search, "foo.bar");
         $this->assertfalse(property_exists($search->foo, 'bar'));
     }
 }
