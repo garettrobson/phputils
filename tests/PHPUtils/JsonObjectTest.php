@@ -4,7 +4,7 @@ declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 use PHPUtils\JsonObject;
 
-final class EmailTest extends TestCase
+final class JsonObjectTest extends TestCase
 {
     public function testSimpleCombineObjects(): void
     {
