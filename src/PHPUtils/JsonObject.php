@@ -282,4 +282,45 @@ class JsonObject
             );
         }
     }
+
+    /**
+    *
+    * Loads all files which match the filter, merging the decoded files into
+    * the $destination object.
+    *
+    * Like loadString this is simple boilerplate, but throws exceptions when
+    * problems arise; RuntimeException when the $path is not a file, and
+    * ParseError when the contents do not decode.
+    *
+    * @param string $path Path of the file to decode.
+    * @throws RuntimeException If the $path is not a file.
+    * @throws ParseError If the json is not able to be decoded.
+    * @return boolean True if the key was round and removed, false if not.
+    */
+    public static function loadPath(object $destination, string $path, bool $recurse = true, string $filter = "/\.json$/i")
+    {
+        if (is_dir($path)) {
+            $files = array_diff(scandir($path), array('.', '..'));
+            foreach($files as $file) {
+                $subPath = $path . DIRECTORY_SEPARATOR . $file;
+                var_dump($subPath);
+                if($recurse && is_dir($subPath)) {
+                    static::loadPath($destination, $subPath, $recurse, $filter);
+                } elseif (is_file($subPath) && preg_match($filter, $subPath)) {
+                    $object = static::loadFile($subPath);
+                    static::combine($destination, $object);
+                }
+            }
+            return $destination;
+        } else {
+            throw new RuntimeException(
+                sprintf(
+                    "%s::%s : Path is not a directory : %s",
+                    __CLASS__,
+                    __METHOD__,
+                    $path
+                )
+            );
+        }
+    }
 }
