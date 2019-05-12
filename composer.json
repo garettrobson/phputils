@@ -1,5 +1,5 @@
 {
-    "name": "phputils/jsonobject",
+    "name": "garettrobson/phputils",
     "description": "PHP utility to perform common operations on json objects.",
     "type": "library",
     "autoload": {
