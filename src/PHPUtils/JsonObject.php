@@ -140,8 +140,7 @@ class JsonObject
                 default:
                     throw new TypeError(
                         sprintf(
-                            "%s::%s : Unable to assign value",
-                            __CLASS__,
+                            "%s : Unable to assign value",
                             __METHOD__,
                             json_last_error_msg()
                         )
@@ -243,8 +242,7 @@ class JsonObject
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new ParseError(
                 sprintf(
-                    "%s::%s : Error parsing string : %s",
-                    __CLASS__,
+                    "%s : Error parsing string : %s",
                     __METHOD__,
                     json_last_error_msg()
                 )
@@ -274,8 +272,7 @@ class JsonObject
         } else {
             throw new RuntimeException(
                 sprintf(
-                    "%s::%s : Path is not a file : %s",
-                    __CLASS__,
+                    "%s : Path is not a file : %s",
                     __METHOD__,
                     $path
                 )
@@ -315,8 +312,7 @@ class JsonObject
         } else {
             throw new RuntimeException(
                 sprintf(
-                    "%s::%s : Path is not a directory : %s",
-                    __CLASS__,
+                    "%s : Path is not a directory : %s",
                     __METHOD__,
                     $path
                 )
